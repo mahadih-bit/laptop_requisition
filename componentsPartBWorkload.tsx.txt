@@ -1,0 +1,102 @@
+import { useFormContext, useFieldArray } from "react-hook-form";
+import { Info } from "lucide-react";
+
+export default function PartBWorkload({ isMISMode }: { isMISMode: boolean }) {
+  const { register, control, watch } = useFormContext();
+  const { fields } = useFieldArray({ control, name: "workloads" });
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-xl font-bold text-slate-800">Part B: Workload & Software Assessment</h2>
+          <p className="text-sm text-slate-500">Identify the tools required for your daily operations.</p>
+        </div>
+        <div className="bg-blue-50 border border-blue-100 p-3 rounded-lg flex items-start gap-3 max-w-xs">
+          <Info className="w-5 h-5 text-blue-500 shrink-0 mt-0.5" />
+          <p className="text-[11px] text-blue-700 leading-relaxed">
+            Policy: Standardization of Laptop (dated Mar 11, 2024) applies to all tier assignments.
+          </p>
+        </div>
+      </div>
+
+      <div className="overflow-x-auto border border-slate-200 rounded-xl">
+        <table className="w-full text-left border-collapse">
+          <thead className="bg-slate-50 text-slate-600 text-xs uppercase tracking-wider">
+            <tr>
+              <th className="p-4 font-semibold">Workload Category</th>
+              <th className="p-4 font-semibold">Software Used</th>
+              <th className="p-4 font-semibold text-center">Required?</th>
+              <th className="p-4 font-semibold">User Justification</th>
+              {isMISMode && <th className="p-4 font-semibold">MIS Validation</th>}
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-100">
+            {fields.map((field, index) => (
+              <tr key={field.id} className="hover:bg-slate-50/50 transition">
+                <td className="p-4 text-sm font-medium text-slate-700">{watch(`workloads.${index}.category`)}</td>
+                <td className="p-4 text-xs text-slate-500 italic">{watch(`workloads.${index}.software`)}</td>
+                <td className="p-4 text-center">
+                  <input
+                    type="checkbox"
+                    {...register(`workloads.${index}.isSelected`)}
+                    className="w-4 h-4 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500"
+                  />
+                </td>
+                <td className="p-4">
+                  <input
+                    type="text"
+                    placeholder="e.g. Daily reporting"
+                    {...register(`workloads.${index}.userJustification`)}
+                    className="w-full text-xs bg-transparent border-b border-slate-200 focus:border-indigo-500 outline-none py-1"
+                  />
+                </td>
+                {isMISMode && (
+                  <td className="p-4">
+                    <select 
+                      {...register(`workloads.${index}.misValidation`)}
+                      className="text-xs border rounded p-1 bg-white"
+                    >
+                      <option value="Pending">Pending</option>
+                      <option value="Recommended">Recommended</option>
+                      <option value="Not Recommended">Not Recommended</option>
+                    </select>
+                  </td>
+                )}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {isMISMode && (
+        <div className="mt-8 p-6 bg-orange-50 border border-orange-200 rounded-2xl">
+          <h3 className="text-orange-800 font-bold mb-4 flex items-center gap-2">
+            <ShieldCheck className="w-5 h-5" /> MIS Evaluator Control Panel
+          </h3>
+          <div className="grid md:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-sm font-semibold text-orange-900 mb-2">Assigned Entitlement Tier</label>
+              <div className="grid grid-cols-2 gap-2">
+                {["Economic User", "Basic User", "Advanced User", "Super User"].map((tier) => (
+                  <label key={tier} className="flex items-center gap-2 p-3 bg-white border border-orange-200 rounded-lg cursor-pointer hover:bg-orange-100 transition">
+                    <input type="radio" value={tier} {...register("entitlementTier")} className="text-orange-600" />
+                    <span className="text-xs font-medium text-slate-700">{tier}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-orange-900 mb-2">Technical Recommendation</label>
+              <textarea 
+                {...register("misRemarks")}
+                className="w-full h-24 p-3 text-sm border border-orange-200 rounded-lg focus:ring-orange-500"
+                placeholder="Specify approved model (e.g., Latitude 5440, 16GB RAM...)"
+              />
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
